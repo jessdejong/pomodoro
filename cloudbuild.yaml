@@ -1,7 +1,15 @@
 steps:
-  # Build the container image
+  # Build the container image with BuildKit for cache mounts
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/pomodoro-timer', '.']
+    env:
+      - 'DOCKER_BUILDKIT=1'
+    args: 
+      - 'build'
+      - '--cache-from'
+      - 'gcr.io/$PROJECT_ID/pomodoro-timer:latest'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/pomodoro-timer'
+      - '.'
   
   # Push the container image to Container Registry
   - name: 'gcr.io/cloud-builders/docker'
