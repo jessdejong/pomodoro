@@ -1,137 +1,53 @@
 # Pomodoro Timer
 
-A beautiful Pomodoro timer application with Beeminder integration, built with React and deployed on Google Cloud Run.
+A beautiful Pomodoro timer with Google authentication and Firestore history tracking.
+
+![Pomodoro Timer Screenshot](./screenshot.png)
 
 ## Features
 
-- ⏱️ 25-minute work sessions with 5-minute breaks (customizable)
-- 🔔 Browser notifications when sessions complete
-- 🔊 Notification sound alerts (customizable, can be disabled)
-- 📊 Track completed Pomodoros
-- ⚙️ Customizable timer durations and settings
-- 🔐 Google authentication (sign in with Google account)
-- 🎨 Beautiful, modern UI with progress visualization
+- ⏱️ Customizable work/break sessions (default: 25min work, 5min break)
+- 🔔 Browser notifications & sound alerts
+- 🔐 Google authentication
+- 📝 Log pomodoros with category and description
+- 📊 View today's pomodoros and all-time history
 - 💾 Settings persist in localStorage
-- ☁️ Ready for Cloud Run deployment
 
-## Tech Stack
+## Quick Start
 
-- **Frontend**: React 18 with Vite
-- **Backend**: Express.js
-- **Hosting**: Google Cloud Run
-- **Database**: Firebase Firestore (to be integrated)
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- npm or yarn
-
-### Installation
-
-1. Install dependencies:
 ```bash
 npm install
-```
-
-2. Start development server:
-```bash
 npm run dev
 ```
 
-The app will be available at `http://localhost:3000`
+Create a `.env` file with your Firebase config (see [FIREBASE_AUTH_SETUP.md](./FIREBASE_AUTH_SETUP.md)):
 
-### Set Up Google Authentication
-
-1. Follow the guide in [FIREBASE_AUTH_SETUP.md](./FIREBASE_AUTH_SETUP.md)
-2. Enable Google sign-in in Firebase Console
-3. Add your Firebase config to `.env` file
-4. Restart the dev server
-
-### Build for Production
-
-```bash
-npm run build
+```env
+VITE_FIREBASE_API_KEY=your-api-key
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+VITE_FIREBASE_APP_ID=your-app-id
 ```
-
-This creates a `dist/` folder with the production build.
-
-### Run Production Server Locally
-
-```bash
-npm run server
-```
-
-Server runs on `http://localhost:8080`
 
 ## Deployment
 
-### Deploy to Google Cloud Run
+Deploy to Google Cloud Run:
 
-1. Build and push the Docker image:
 ```bash
-gcloud builds submit --tag gcr.io/YOUR-PROJECT-ID/pomodoro-timer
+gcloud builds submit --config cloudbuild.yaml
 ```
 
-2. Deploy to Cloud Run:
-```bash
-gcloud run deploy pomodoro-timer \
-  --image gcr.io/YOUR-PROJECT-ID/pomodoro-timer \
-  --platform managed \
-  --region us-central1 \
-  --allow-unauthenticated \
-  --port 8080
-```
+Make sure `.env.production` contains your Firebase config and add your Cloud Run domain to Firebase Auth authorized domains.
 
-### Deploy Frontend to Firebase Hosting (Alternative)
+## Tech Stack
 
-1. Install Firebase CLI:
-```bash
-npm install -g firebase-tools
-```
-
-2. Login and initialize:
-```bash
-firebase login
-firebase init hosting
-```
-
-3. Build and deploy:
-```bash
-npm run build
-firebase deploy --only hosting
-```
-
-## Project Structure
-
-```
-pomodoro/
-├── src/
-│   ├── components/
-│   │   └── Timer.jsx       # Main timer component
-│   ├── App.jsx             # Root component
-│   ├── main.jsx            # Entry point
-│   └── index.css           # Global styles
-├── server/
-│   └── server.js           # Express server
-├── Dockerfile              # Container configuration
-├── vite.config.js          # Vite configuration
-└── package.json
-```
-
-## Future Enhancements
-
-- [ ] Beeminder API integration
-- [x] User authentication (Google)
-- [ ] Session history tracking (per user)
-- [ ] Statistics and analytics (per user)
-- [x] Customizable timer durations
-- [x] Sound alerts
-- [ ] Dark mode
-- [ ] Sync settings across devices
+- React 18 + Vite
+- Firebase Auth & Firestore
+- Express.js (serving static files)
+- Google Cloud Run
 
 ## License
 
 MIT
-
