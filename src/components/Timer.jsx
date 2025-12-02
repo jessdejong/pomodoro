@@ -25,6 +25,8 @@ function Timer() {
   const sessionTypeRef = useRef(sessionType);
   const completedPomodorosRef = useRef(completedPomodoros);
   const currentWorkStartRef = useRef(null);
+  const timerStartTimeRef = useRef(null);
+  const timerStartDurationRef = useRef(null);
 
   // Keep refs in sync with state
   useEffect(() => {
@@ -141,16 +143,32 @@ function Timer() {
 
   useEffect(() => {
     if (isRunning && timeLeft > 0) {
+      // Store start time and initial duration when timer starts
+      if (!timerStartTimeRef.current) {
+        timerStartTimeRef.current = Date.now();
+        timerStartDurationRef.current = timeLeft;
+      }
+
       intervalRef.current = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            handleSessionComplete();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+        if (!timerStartTimeRef.current || !timerStartDurationRef.current) return;
+
+        // Calculate elapsed time in seconds
+        const elapsed = Math.floor((Date.now() - timerStartTimeRef.current) / 1000);
+        const remaining = Math.max(0, timerStartDurationRef.current - elapsed);
+
+        if (remaining <= 0) {
+          handleSessionComplete();
+          timerStartTimeRef.current = null;
+          timerStartDurationRef.current = null;
+          setTimeLeft(0);
+        } else {
+          setTimeLeft(remaining);
+        }
+      }, 100); // Check more frequently for smoother updates
     } else {
+      // Reset timer tracking when paused or stopped
+      timerStartTimeRef.current = null;
+      timerStartDurationRef.current = null;
       clearInterval(intervalRef.current);
     }
 
@@ -170,8 +188,17 @@ function Timer() {
   const toggleTimer = () => {
     setIsRunning((prev) => {
       const next = !prev;
-      if (!prev && next && sessionType === 'work' && !currentWorkStartRef.current) {
-        currentWorkStartRef.current = new Date();
+      if (!prev && next) {
+        // Starting timer - reset timestamp tracking
+        timerStartTimeRef.current = Date.now();
+        timerStartDurationRef.current = timeLeft;
+        if (sessionType === 'work' && !currentWorkStartRef.current) {
+          currentWorkStartRef.current = new Date();
+        }
+      } else {
+        // Pausing timer - clear timestamp tracking
+        timerStartTimeRef.current = null;
+        timerStartDurationRef.current = null;
       }
       return next;
     });
@@ -179,6 +206,8 @@ function Timer() {
 
   const resetTimer = () => {
     setIsRunning(false);
+    timerStartTimeRef.current = null;
+    timerStartDurationRef.current = null;
     currentWorkStartRef.current = null;
     if (sessionType === 'work') {
       setTimeLeft(workDuration);
